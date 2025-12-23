@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reddit Sentiment Search API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .search-section {
+            margin-bottom: 40px;
+        }
+
+        .search-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .search-controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 10px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .results-section {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 2px solid #eee;
+        }
+
+        .results-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            background: #f9f9f9;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .chart-card h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .chart-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .chart-label {
+            min-width: 80px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .chart-bar-fill {
+            flex: 1;
+            height: 25px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .hits {
+            margin-top: 30px;
+        }
+
+        .hit {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .hit-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .hit-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            gap: 5px;
+        }
+
+        .meta-label {
+            font-weight: 600;
+        }
+
+        .hit-text {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .hit-sentiment {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .sentiment-positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .sentiment-negative {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .sentiment-neutral {
+            background: #e7e8ea;
+            color: #383d41;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .example-queries {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .example-query {
+            background: #f0f7ff;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .example-query:hover {
+            background: #e6f2ff;
+            transform: translateY(-2px);
+        }
+
+        .example-query-title {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .example-query-desc {
+            font-size: 0.85em;
+            color: #555;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Reddit Sentiment Search API</h1>
+            <p>Real-time sentiment analysis and search across Reddit</p>
+            <div
+                style="margin-top: 15px; display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap;">
+                <div style="padding: 10px 20px; background: rgba(255,255,255,0.2); border-radius: 20px;">
+                    <span style="font-size: 0.9em; opacity: 0.9;">📊 Total Messages: </span>
+                    <span id="totalMessages" style="font-weight: bold; font-size: 1.1em;">Loading...</span>
+                </div>
+                <a href="/topics"
+                    style="padding: 10px 24px; background: rgba(255,255,255,0.3); border: 2px solid white; border-radius: 20px; color: white; text-decoration: none; font-weight: 700; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;"
+                    onmouseover="this.style.background='rgba(255,255,255,0.5)'; this.style.transform='scale(1.05)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='scale(1)'">
+                    📈 View All Topics
+                </a>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Search Section -->
+            <div class="search-section">
+                <h2>Search & Filter</h2>
+
+                <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 20px;">
+                    <div style="flex: 1; display: flex; gap: 10px;">
+                        <input type="text" id="query" placeholder="Search for topics, keywords, or phrases..."
+                            value="ai"
+                            style="flex: 1; padding: 12px 16px; border: 2px solid #ddd; border-radius: 6px; font-size: 1em; transition: border-color 0.3s;"
+                            onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#ddd'">
+                        <button class="btn btn-primary" onclick="search()" style="padding: 12px 30px;">Search</button>
+                    </div>
+
+                    <div style="position: relative;">
+                        <button class="btn btn-secondary" onclick="toggleFilters()"
+                            style="padding: 12px 20px; display: flex; align-items: center; gap: 8px;">
+                            <span>⚙️ Filters</span>
+                            <span id="filterIndicator"
+                                style="display: none; background: #667eea; color: white; border-radius: 10px; padding: 2px 8px; font-size: 0.75em;">Active</span>
+                        </button>
+
+                        <div id="filtersDropdown"
+                            style="display: none; position: absolute; right: 0; top: 50px; background: white; border: 2px solid #ddd; border-radius: 8px; padding: 20px; min-width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 1000;">
+                            <div style="margin-bottom: 15px;">
+                                <label
+                                    style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Topic</label>
+                                <select id="topic" onchange="updateFilterIndicator()"
+                                    style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 1em;">
+                                    <option value="">All Topics</option>
+                                    <option value="technology">Technology</option>
+                                    <option value="sports">Sports</option>
+                                    <option value="gaming">Gaming</option>
+                                    <option value="entertainment">Entertainment</option>
+                                    <option value="business">Business</option>
+                                    <option value="science">Science</option>
+                                    <option value="health">Health</option>
+                                    <option value="travel">Travel</option>
+                                    <option value="food">Food</option>
+                                    <option value="nature">Nature</option>
+                                    <option value="art">Art</option>
+                                    <option value="education">Education</option>
+                                    <option value="news">News</option>
+                                </select>
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label
+                                    style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Sentiment</label>
+                                <select id="sentiment" onchange="updateFilterIndicator()"
+                                    style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 1em;">
+                                    <option value="">All Sentiments</option>
+                                    <option value="positive">Positive</option>
+                                    <option value="negative">Negative</option>
+                                    <option value="neutral">Neutral</option>
+                                </select>
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label
+                                    style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Results
+                                    per page</label>
+                                <select id="size"
+                                    style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 1em;">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-secondary" onclick="clearFilters()"
+                                style="width: 100%; padding: 10px; margin-top: 10px;">Clear Filters</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Global Topics Section -->
+            <div id="globalTopicsSection"
+                style="margin-bottom: 40px; padding: 30px; background: #f9f9f9; border-radius: 8px;">
+                <h2 style="margin-bottom: 20px; color: #333;">📈 Topics Overview (All Data)</h2>
+
+                <!-- Sentiment Filter Tabs -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <button onclick="filterTopicsBySentiment('all')" id="filterAll"
+                        style="padding: 10px 20px; border: 2px solid #667eea; background: #667eea; color: white; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        All Topics
+                    </button>
+                    <button onclick="filterTopicsBySentiment('positive')" id="filterPositive"
+                        style="padding: 10px 20px; border: 2px solid #28a745; background: white; color: #28a745; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        😊 Positive
+                    </button>
+                    <button onclick="filterTopicsBySentiment('neutral')" id="filterNeutral"
+                        style="padding: 10px 20px; border: 2px solid #6c757d; background: white; color: #6c757d; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        😐 Neutral
+                    </button>
+                    <button onclick="filterTopicsBySentiment('negative')" id="filterNegative"
+                        style="padding: 10px 20px; border: 2px solid #dc3545; background: white; color: #dc3545; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        😞 Negative
+                    </button>
+                </div>
+
+                <!-- Carousel Container -->
+                <div style="position: relative; overflow: hidden;">
+                    <button onclick="slideTopics(-1)"
+                        style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 10; background: rgba(255,255,255,0.9); border: 2px solid #667eea; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.2em; color: #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        ‹
+                    </button>
+                    <div id="topicsCarousel"
+                        style="display: flex; gap: 15px; transition: transform 0.3s ease; padding: 10px 50px;">
+                        <!-- Topics will be inserted here -->
+                    </div>
+                    <button onclick="slideTopics(1)"
+                        style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 10; background: rgba(255,255,255,0.9); border: 2px solid #667eea; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.2em; color: #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        ›
+                    </button>
+                </div>
+
+                <div style="text-align: center; margin-top: 15px; color: #666; font-size: 0.85em;">
+                    <span id="carouselPosition">1-5 of 20</span>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <h2>Results</h2>
+
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="value" id="totalHits">0</div>
+                        <div class="label">Total Hits</div>
+                    </div>
+                    <div class="stat-card" id="avgSentimentCard">
+                        <div class="value" id="avgSentimentScore">Neutral</div>
+                        <div class="label">Average Sentiment</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Sentiment Distribution</h3>
+                        <div id="sentimentChart"></div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Top Topics</h3>
+                        <div id="topicsChart"></div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Top Subreddits</h3>
+                        <div id="subredditsChart"></div>
+                    </div>
+                </div>
+
+                <!-- Hits -->
+                <div class="hits">
+                    <h3 style="margin-bottom: 20px;">Documents</h3>
+                    <div id="hitsContainer"></div>
+                </div>
+            </div>
+
+            <div id="loadingSection" style="display: none;">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Searching...</p>
+                </div>
+            </div>
+
+            <div id="errorSection" style="display: none;">
+                <div class="error" id="errorMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        function toggleFilters() {
+            const dropdown = document.getElementById('filtersDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function updateFilterIndicator() {
+            const topic = document.getElementById('topic').value;
+            const sentiment = document.getElementById('sentiment').value;
+            const indicator = document.getElementById('filterIndicator');
+
+            if (topic || sentiment) {
+                indicator.style.display = 'inline-block';
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('topic').value = '';
+            document.getElementById('sentiment').value = '';
+            document.getElementById('size').value = '10';
+            updateFilterIndicator();
+        }
+
+        // Global variables for carousel
+        let currentTopicsData = [];
+        let currentCarouselIndex = 0;
+        let currentSentimentFilter = 'all';
+
+        // Load and display global topics overview
+        function loadGlobalTopics() {
+            try {
+                // Use embedded data instead of API call
+                const data = window.GLOBAL_TOPICS_DATA || {
+                    all_topics_with_sentiment: {},
+                    topics_by_sentiment: {}
+                };
+
+                // Store all topics data globally
+                window.allTopicsData = data;
+
+                // Initialize with all topics
+                filterTopicsBySentiment('all');
+            } catch (error) {
+                console.error('Error loading global topics:', error);
+            }
+        }
+
+        function filterTopicsBySentiment(sentiment) {
+            currentSentimentFilter = sentiment;
+            currentCarouselIndex = 0;
+
+            // Update button styles
+            ['All', 'Positive', 'Neutral', 'Negative'].forEach(s => {
+                const btn = document.getElementById('filter' + s);
+                if (btn) {
+                    const isActive = (s.toLowerCase() === sentiment) || (s === 'All' && sentiment === 'all');
+                    if (isActive) {
+                        const color = s === 'Positive' ? '#28a745' : s === 'Negative' ? '#dc3545' : s === 'Neutral' ? '#6c757d' : '#667eea';
+                        btn.style.background = color;
+                        btn.style.color = 'white';
+                    } else {
+                        const color = s === 'Positive' ? '#28a745' : s === 'Negative' ? '#dc3545' : s === 'Neutral' ? '#6c757d' : '#667eea';
+                        btn.style.background = 'white';
+                        btn.style.color = color;
+                    }
+                }
+            });
+
+            const data = window.allTopicsData || {};
+            let topics = [];
+
+            if (sentiment === 'all') {
+                // Show all topics sorted by count
+                topics = Object.entries(data.all_topics_with_sentiment || {})
+                    .sort((a, b) => b[1].count - a[1].count)
+                    .map(([topic, info]) => ({
+                        topic,
+                        count: info.count,
+                        sentiment_distribution: info.sentiment_distribution,
+                        dominant_sentiment: info.dominant_sentiment
+                    }));
+            } else {
+                // Show topics filtered by sentiment
+                const sentimentTopics = data.topics_by_sentiment?.[sentiment] || [];
+                topics = sentimentTopics.map(t => ({
+                    topic: t.topic,
+                    count: t.count,
+                    sentiment_distribution: { [sentiment]: t.count },
+                    dominant_sentiment: sentiment
+                }));
+            }
+
+            currentTopicsData = topics;
+            renderCarousel();
+        }
+
+        function renderCarousel() {
+            const carousel = document.getElementById('topicsCarousel');
+            if (!carousel) return;
+
+            const itemsPerPage = 5;
+            const startIdx = currentCarouselIndex * itemsPerPage;
+            const endIdx = startIdx + itemsPerPage;
+            const visibleTopics = currentTopicsData.slice(startIdx, endIdx);
+
+            let html = '';
+            for (const item of visibleTopics) {
+                const dominantColor = item.dominant_sentiment === 'positive' ? '#28a745' :
+                    item.dominant_sentiment === 'negative' ? '#dc3545' : '#6c757d';
+
+                let sentimentBadge = '';
+                if (currentSentimentFilter === 'all') {
+                    sentimentBadge = `P:${item.sentiment_distribution.positive || 0} | N:${item.sentiment_distribution.negative || 0} | U:${item.sentiment_distribution.neutral || 0}`;
+                } else {
+                    sentimentBadge = `${item.count} posts`;
+                }
+
+                html += `
+                    <div style="min-width: 200px; flex-shrink: 0; padding: 15px; background: white; border-left: 4px solid ${dominantColor}; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="font-weight: 600; color: #333; margin-bottom: 5px; font-size: 0.95em;">${item.topic}</div>
+                        <div style="font-size: 0.85em; color: #666; margin-bottom: 8px;">${item.count} posts</div>
+                        <div style="font-size: 0.75em; color: #999;">${sentimentBadge}</div>
+                    </div>
+                `;
+            }
+
+            carousel.innerHTML = html;
+
+            // Update position indicator
+            const totalPages = Math.ceil(currentTopicsData.length / itemsPerPage);
+            const currentPage = currentCarouselIndex + 1;
+            const totalItems = currentTopicsData.length;
+            const displayStart = startIdx + 1;
+            const displayEnd = Math.min(endIdx, totalItems);
+
+            const positionEl = document.getElementById('carouselPosition');
+            if (positionEl) {
+                positionEl.textContent = `${displayStart}-${displayEnd} of ${totalItems}`;
+            }
+        }
+
+        function slideTopics(direction) {
+            const itemsPerPage = 5;
+            const totalPages = Math.ceil(currentTopicsData.length / itemsPerPage);
+
+            currentCarouselIndex += direction;
+
+            // Loop around
+            if (currentCarouselIndex < 0) {
+                currentCarouselIndex = totalPages - 1;
+            } else if (currentCarouselIndex >= totalPages) {
+                currentCarouselIndex = 0;
+            }
+
+            renderCarousel();
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const dropdown = document.getElementById('filtersDropdown');
+            const filterButton = event.target.closest('button');
+
+            if (!event.target.closest('#filtersDropdown') && (!filterButton || !filterButton.onclick || filterButton.onclick.toString().indexOf('toggleFilters') === -1)) {
+                if (dropdown) dropdown.style.display = 'none';
+            }
+        });
+
+        function setQuery(q, topic = '', sentiment = '') {
+            document.getElementById('query').value = q;
+            document.getElementById('topic').value = topic;
+            document.getElementById('sentiment').value = sentiment;
+            search();
+        }
+
+        async function search() {
+            const query = document.getElementById('query').value.trim();
+            if (!query) {
+                showError('Please enter a search query');
+                return;
+            }
+
+            showLoading();
+            hideResults();
+            hideError();
+
+            try {
+                const params = new URLSearchParams({
+                    q: query,
+                    size: document.getElementById('size').value
+                });
+
+                const topic = document.getElementById('topic').value;
+                if (topic) params.append('topics', topic);
+
+                const sentiment = document.getElementById('sentiment').value;
+                if (sentiment) params.append('sentiment', sentiment);
+
+                const response = await fetch(`${API_BASE}/search?${params}`);
+                if (!response.ok) throw new Error(`API error: ${response.status}`);
+
+                const data = await response.json();
+                displayResults(data);
+                hideLoading();
+                showResults();
+            } catch (err) {
+                hideLoading();
+                showError(`Error: ${err.message}`);
+            }
+        }
+
+        function displayResults(data) {
+            // Stats
+            document.getElementById('totalHits').textContent = data.sentiment_summary.total_hits;
+
+            // Calculate average sentiment (-1 to +1)
+            const avgSentiment = data.sentiment_summary.avg_sentiment || 0;
+            const sentimentCard = document.getElementById('avgSentimentCard');
+            const sentimentValue = document.getElementById('avgSentimentScore');
+
+            if (avgSentiment > 0.2) {
+                sentimentValue.textContent = 'Positive';
+                sentimentCard.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+            } else if (avgSentiment < -0.2) {
+                sentimentValue.textContent = 'Negative';
+                sentimentCard.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+            } else {
+                sentimentValue.textContent = 'Neutral';
+                sentimentCard.style.background = 'linear-gradient(135deg, #6c757d 0%, #5a6268 100%)';
+            }
+
+            // Sentiment Chart
+            const sentimentDist = data.sentiment_summary.sentiment_distribution;
+            const maxSentiment = Math.max(...Object.values(sentimentDist));
+            let sentimentHtml = '';
+            for (const [label, count] of Object.entries(sentimentDist)) {
+                const pct = ((count / maxSentiment) * 100).toFixed(0);
+                const color = label === 'positive' ? '#28a745' : label === 'negative' ? '#dc3545' : '#6c757d';
+                sentimentHtml += `
+                    <div class="chart-bar">
+                        <div class="chart-label">${label}</div>
+                        <div class="chart-bar-fill" style="background: linear-gradient(90deg, ${color} 0%, ${color}cc 100%);">${count}</div>
+                    </div>
+                `;
+            }
+            document.getElementById('sentimentChart').innerHTML = sentimentHtml;
+
+            // Topics Chart - Compact badge display
+            const topTopics = data.sentiment_summary.top_topics.slice(0, 3);
+            let topicsHtml = '<div style="display: flex; flex-wrap: wrap; gap: 6px;">';
+            for (const topic of topTopics) {
+                const sentiments = topic.sentiment || {};
+                const dominantSentiment = Object.keys(sentiments).reduce((a, b) =>
+                    sentiments[a] > sentiments[b] ? a : b, 'neutral');
+                const badgeColor = dominantSentiment === 'positive' ? '#d4edda' :
+                    dominantSentiment === 'negative' ? '#f8d7da' : '#e2e3e5';
+                const textColor = dominantSentiment === 'positive' ? '#155724' :
+                    dominantSentiment === 'negative' ? '#721c24' : '#383d41';
+                topicsHtml += `
+                    <div style="padding: 4px 10px; background: ${badgeColor}; color: ${textColor}; border-radius: 16px; font-size: 0.8em; font-weight: 500; white-space: nowrap;">
+                        ${topic.topic} (${topic.count})
+                    </div>
+                `;
+            }
+            topicsHtml += '</div>';
+            document.getElementById('topicsChart').innerHTML = topicsHtml;
+
+            // Subreddits Chart - Compact badge display
+            const topSubreddits = data.sentiment_summary.top_subreddits.slice(0, 3);
+            let subredditsHtml = '<div style="display: flex; flex-wrap: wrap; gap: 6px;">';
+            for (const sub of topSubreddits) {
+                const sentiments = sub.sentiment || {};
+                const dominantSentiment = Object.keys(sentiments).reduce((a, b) =>
+                    sentiments[a] > sentiments[b] ? a : b, 'neutral');
+                const badgeColor = dominantSentiment === 'positive' ? '#d4edda' :
+                    dominantSentiment === 'negative' ? '#f8d7da' : '#e2e3e5';
+                const textColor = dominantSentiment === 'positive' ? '#155724' :
+                    dominantSentiment === 'negative' ? '#721c24' : '#383d41';
+                subredditsHtml += `
+                    <div style="padding: 4px 10px; background: ${badgeColor}; color: ${textColor}; border-radius: 16px; font-size: 0.8em; font-weight: 500; white-space: nowrap;">
+                        r/${sub.subreddit} (${sub.count})
+                    </div>
+                `;
+            }
+            subredditsHtml += '</div>';
+            document.getElementById('subredditsChart').innerHTML = subredditsHtml;
+
+            // Hits
+            let hitsHtml = '';
+            for (const hit of data.hits) {
+                const sentimentClass = `sentiment-${hit.sentiment_label}`;
+                const date = new Date(hit.created_at * 1000).toLocaleDateString();
+                hitsHtml += `
+                    <div class="hit">
+                        <div class="hit-title">${escapeHtml(hit.title)}</div>
+                        <div class="hit-meta">
+                            <div class="meta-item"><span class="meta-label">Sub:</span> ${escapeHtml(hit.subreddit)}</div>
+                            <div class="meta-item"><span class="meta-label">Topics:</span> ${hit.topics.join(', ')}</div>
+                            <div class="meta-item"><span class="meta-label">Date:</span> ${date}</div>
+                            <div class="meta-item"><span class="meta-label">Score:</span> ${hit.sentiment_score.toFixed(3)}</div>
+                        </div>
+                        <div class="hit-text">${escapeHtml(hit.text)}</div>
+                        <span class="hit-sentiment ${sentimentClass}">${hit.sentiment_label.toUpperCase()}</span>
+                    </div>
+                `;
+            }
+            document.getElementById('hitsContainer').innerHTML = hitsHtml || '<p>No results found</p>';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showLoading() {
+            document.getElementById('loadingSection').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSection').style.display = 'none';
+        }
+
+        function showResults() {
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+
+        function hideResults() {
+            document.getElementById('resultsSection').style.display = 'none';
+        }
+
+        function showError(msg) {
+            document.getElementById('errorMessage').textContent = msg;
+            document.getElementById('errorSection').style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorSection').style.display = 'none';
+        }
+
+        // Fetch and update total message count
+        async function updateTotalMessages() {
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('totalMessages').textContent = data.total_documents.toLocaleString();
+                }
+            } catch (err) {
+                console.error('Failed to fetch stats:', err);
+            }
+        }
+
+        // Auto-search on page load and start polling for stats
+        window.addEventListener('load', () => {
+            search();
+            updateTotalMessages();
+            // Update total messages every 5 seconds
+            setInterval(updateTotalMessages, 5000);
+        });
+
+        // Initialize global topics on page load
+        loadGlobalTopics();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+transformers>=4.0.0
+torch
+elasticsearch>=7.0.0

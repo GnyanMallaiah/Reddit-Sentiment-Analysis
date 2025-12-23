@@ -1,0 +1,4 @@
+praw
+kafka-python
+python-dotenv
+langdetect

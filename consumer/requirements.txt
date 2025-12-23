@@ -1,0 +1,8 @@
+python-dotenv
+transformers>=4.0.0
+torch
+kafka-python
+elasticsearch>=7.0.0
+langdetect
+emoji==0.6.0
+requests
