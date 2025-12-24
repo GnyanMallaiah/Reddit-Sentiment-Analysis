@@ -857,7 +857,7 @@
                             <div class="meta-item"><span class="meta-label">Sub:</span> ${escapeHtml(hit.subreddit)}</div>
                             <div class="meta-item"><span class="meta-label">Topics:</span> ${hit.topics.join(', ')}</div>
                             <div class="meta-item"><span class="meta-label">Date:</span> ${date}</div>
-                            <div class="meta-item"><span class="meta-label">Score:</span> ${hit.sentiment_score.toFixed(3)}</div>
+                            <div class="meta-item"><span class="meta-label">Relevance:</span> ${hit.score.toFixed(2)}</div>
                         </div>
                         <div class="hit-text">${escapeHtml(hit.text)}</div>
                         <span class="hit-sentiment ${sentimentClass}">${hit.sentiment_label.toUpperCase()}</span>
