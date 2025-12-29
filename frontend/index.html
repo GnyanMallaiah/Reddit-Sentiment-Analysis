@@ -359,19 +359,19 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔍 Reddit Sentiment Search API</h1>
+            <h1>Reddit Sentiment Search API</h1>
             <p>Real-time sentiment analysis and search across Reddit</p>
             <div
                 style="margin-top: 15px; display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap;">
                 <div style="padding: 10px 20px; background: rgba(255,255,255,0.2); border-radius: 20px;">
-                    <span style="font-size: 0.9em; opacity: 0.9;">📊 Total Messages: </span>
+                    <span style="font-size: 0.9em; opacity: 0.9;">Total Messages: </span>
                     <span id="totalMessages" style="font-weight: bold; font-size: 1.1em;">Loading...</span>
                 </div>
                 <a href="/topics"
                     style="padding: 10px 24px; background: rgba(255,255,255,0.3); border: 2px solid white; border-radius: 20px; color: white; text-decoration: none; font-weight: 700; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;"
                     onmouseover="this.style.background='rgba(255,255,255,0.5)'; this.style.transform='scale(1.05)'"
                     onmouseout="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='scale(1)'">
-                    📈 View All Topics
+                    View All Topics
                 </a>
             </div>
         </div>
@@ -458,7 +458,7 @@
             <!-- Global Topics Section -->
             <div id="globalTopicsSection"
                 style="margin-bottom: 40px; padding: 30px; background: #f9f9f9; border-radius: 8px;">
-                <h2 style="margin-bottom: 20px; color: #333;">📈 Topics Overview (All Data)</h2>
+                <h2 style="margin-bottom: 20px; color: #333;">Topics Overview (All Data)</h2>
 
                 <!-- Sentiment Filter Tabs -->
                 <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
@@ -468,15 +468,15 @@
                     </button>
                     <button onclick="filterTopicsBySentiment('positive')" id="filterPositive"
                         style="padding: 10px 20px; border: 2px solid #28a745; background: white; color: #28a745; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                        😊 Positive
+                        Positive
                     </button>
                     <button onclick="filterTopicsBySentiment('neutral')" id="filterNeutral"
                         style="padding: 10px 20px; border: 2px solid #6c757d; background: white; color: #6c757d; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                        😐 Neutral
+                        Neutral
                     </button>
                     <button onclick="filterTopicsBySentiment('negative')" id="filterNegative"
                         style="padding: 10px 20px; border: 2px solid #dc3545; background: white; color: #dc3545; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                        😞 Negative
+                        Negative
                     </button>
                 </div>
 
